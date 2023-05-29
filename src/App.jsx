@@ -1,92 +1,63 @@
-import { starwars } from "./data/starwars";
+import { useEffect } from "react";
+import { app, db } from "./firebaseConfig/firebase";
 import {
-  getAuth,
-  onAuthStateChanged,
-  signInWithPopup,
-  signOut,
-  GoogleAuthProvider,
-} from "firebase/auth";
-import { app } from "./firebaseConfig/firebase";
-import { useEffect, useState } from "react";
+  collection,
+  collectionGroup,
+  setDoc,
+  doc,
+  deleteDoc,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
+import { starwars } from "./data/starwars";
 
+import Navbar from "./components/Navbar";
 import ShowEpisodeTable from "./components/ShowEpisodeTable";
 
 import "./App.css";
 
 function App() {
-  const auth = getAuth(app);
-  const provider = new GoogleAuthProvider();
+  const populateCuratedShows = async (user) => {
+    const showsSnapshot = await getDocs(collection(db, "shows"));
+    showsSnapshot.forEach((show) => {
+      // doc.data() is never undefined for query doc snapshots
+      console.log(show.id, " => ", show.data());
+    });
 
-  const [userInfo, setUserInfo] = useState("");
+    const episodes = query(collectionGroup(db, "episodes"));
+    const querySnapshot = await getDocs(episodes);
+    querySnapshot.forEach((doc) => {
+      console.log(doc.id, " => ", doc.data());
+    });
 
-  const onSignIn = () => {
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        console.log("Sign in success!");
-        // This gives you a Google Access Token. You can use it to access the Google API.
-        const credential = GoogleAuthProvider.credentialFromResult(result);
-        const token = credential.accessToken;
-        // The signed-in user info.
-        const user = result.user;
-        // IdP data available using getAdditionalUserInfo(result)
-      })
-      .catch((error) => {
-        console.log("Sign in error!");
-        // Handle Errors here.
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        // The email of the user's account used.
-        const email = error.customData.email;
-        // The AuthCredential type that was used.
-        const credential = GoogleAuthProvider.credentialFromError(error);
-      });
-  };
-
-  const onSignOut = () => {
-    signOut(auth)
-      .then(() => {
-        console.log("Signed out");
-      })
-      .catch((error) => {
-        console.log("Could not sign out");
-        console.log("Error: " + error);
-      });
+    // const q = query(
+    //   showsRef,
+    //   where("uid", "==", user.uid),
+    //   where("showName", "==", showDetails.name)
+    // );
+    // const querySnapshot = await getDocs(q);
+    // const watchedEpisodes = new Set();
+    // querySnapshot.forEach((episode) => {
+    //   watchedEpisodes.add(episode.id);
+    // });
+    // setTotalWatched(watchedEpisodes.size);
+    // setEpisodeStatusArray(
+    //   showDetails.episodes.map((episode) => {
+    //     const episodeId = user.uid + episode.title.replace(/\s/g, "");
+    //     return watchedEpisodes.has(episodeId);
+    //   })
+    // );
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // User is signed in, see docs for a list of available properties
-        // https://firebase.google.com/docs/reference/js/firebase.User
-        console.log("State changed to signed in");
-        setUserInfo(user);
-      } else {
-        // User is signed out
-        console.log("State changed to signed out");
-        setUserInfo("");
-      }
-    });
-    return () => {
-      unsubscribe();
-    };
+    populateCuratedShows();
   }, []);
 
   return (
     <>
       <nav>
-        <div className="user-info">
-          <p>Username: {userInfo && userInfo.displayName}</p>
-        </div>
-        {!userInfo && (
-          <div>
-            <button onClick={onSignIn}>Sign In</button>
-          </div>
-        )}
-        {userInfo && (
-          <div>
-            <button onClick={onSignOut}>Sign Out</button>
-          </div>
-        )}
+        <Navbar />
       </nav>
       <main>
         <div className="container">
