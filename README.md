@@ -19,7 +19,7 @@ Make sure you have all the prequesites. Then simply use the commands below to ru
 
 ```bash
 npm install
-npm run start
+npm run dev
 ```
 
 ### Prerequisites
