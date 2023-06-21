@@ -15,9 +15,10 @@ Don't hesitate if you have any suggestions, comments or just want to connect!
 
 ## Installation
 
-Make sure you have all the prequesites. Then simply use the command below to run it locally! I will deploy and share the link here soon!
+Make sure you have all the prequesites. Then simply use the commands below to run it locally! I will deploy and share the link here soon!
 
 ```bash
+npm install
 npm run start
 ```
 
